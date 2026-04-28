@@ -26,12 +26,14 @@ function initializeFirebase() {
     }
 
     try {
+      console.log('🔥 Initializing Firebase...');
       app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
       db = getFirestore(app);
       auth = getAuth(app);
+      console.log('✅ Firebase initialized successfully');
       return app;
     } catch (error) {
-      console.error('Failed to initialize Firebase:', error);
+      console.error('❌ Failed to initialize Firebase:', error);
       return null;
     }
   }
@@ -40,21 +42,21 @@ function initializeFirebase() {
 
 // Getter functions that ensure Firebase is initialized
 export function getFirebaseApp(): FirebaseApp | null {
-  if (!app) {
+  if (!app && typeof window !== 'undefined') {
     initializeFirebase();
   }
   return app;
 }
 
 export function getFirebaseDb(): Firestore | null {
-  if (!db) {
+  if (!db && typeof window !== 'undefined') {
     initializeFirebase();
   }
   return db;
 }
 
 export function getFirebaseAuth(): Auth | null {
-  if (!auth) {
+  if (!auth && typeof window !== 'undefined') {
     initializeFirebase();
   }
   return auth;

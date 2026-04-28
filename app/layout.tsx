@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { AuthProvider } from '@/components/AuthProvider'
+import FirebaseDebug from '@/components/FirebaseDebug'
 
 export const metadata: Metadata = {
   title: 'DTI CSF System',
@@ -18,6 +19,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
         </AuthProvider>
+        <FirebaseDebug />
       </body>
     </html>
   )

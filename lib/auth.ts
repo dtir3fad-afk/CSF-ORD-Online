@@ -221,9 +221,14 @@ export class AuthService {
   static onAuthStateChanged(callback: (user: User | null) => void) {
     const auth = getFirebaseAuth();
     if (auth) {
+      console.log('🔥 Setting up Firebase auth state listener');
       return onAuthStateChanged(auth, callback);
+    } else {
+      console.log('⚠️ Firebase auth not available, calling callback with null user');
+      // If Firebase auth is not available, immediately call callback with null
+      setTimeout(() => callback(null), 0);
+      return () => {}; // Return empty unsubscribe function
     }
-    return () => {}; // Return empty unsubscribe function if auth not available
   }
   
   // Get current user
