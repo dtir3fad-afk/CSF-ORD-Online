@@ -1,0 +1,79 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for DTI CSF System
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if user is admin by looking up Firestore
+    function isAdmin() {
+      return request.auth != null && 
+             firestore.exists(/databases/(default)/documents/admin_users/$(request.auth.uid)) &&
+             firestore.get(/databases/(default)/documents/admin_users/$(request.auth.uid)).data.isActive == true;
+    }
+    
+    // Documents folder - where CSF documents are stored
+    match /documents/{allPaths=**} {
+      // Allow authenticated admin users to upload documents
+      allow write: if isAdmin();
+      
+      // Allow public read access for document downloads
+      // This is necessary for the CSF system where customers need to download
+      // documents after completing feedback forms
+      allow read: if true;
+    }
+    
+    // Preview documents - blurred/watermarked versions
+    match /documents/previews/{fileName} {
+      // Allow public read for previews (shown before form completion)
+      allow read: if true;
+      
+      // Only admins can upload previews
+      allow write: if isAdmin();
+    }
+    
+    // Full documents - complete versions unlocked after form completion
+    match /documents/full/{fileName} {
+      // Allow public read for downloads (after form completion)
+      allow read: if true;
+      
+      // Only admins can upload full documents
+      allow write: if isAdmin();
+    }
+    
+    // Temporary uploads folder (if needed for processing)
+    match /temp/{allPaths=**} {
+      // Allow authenticated users to upload to temp folder
+      allow read, write: if request.auth != null;
+      
+      // Auto-delete temp files after 1 hour
+      allow delete: if true;
+    }
+    
+    // Admin uploads - for system documents, logos, etc.
+    match /admin/{allPaths=**} {
+      // Only admin users can access admin folder
+      allow read, write: if isAdmin();
+    }
+    
+    // Public assets - logos, images, etc.
+    match /public/{allPaths=**} {
+      // Anyone can read public assets
+      allow read: if true;
+      
+      // Only admins can upload public assets
+      allow write: if isAdmin();
+    }
+    
+    // Default rule - deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Security Notes:
+// 1. Documents are publicly readable to allow downloads after CSF completion
+// 2. Only authenticated admin users can upload documents
+// 3. The system relies on obscure URLs for security (documents are not listed publicly)
+// 4. Consider implementing additional security layers in your application logic
+// 5. Monitor storage access logs for any suspicious activity

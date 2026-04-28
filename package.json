@@ -1,0 +1,39 @@
+{
+  "name": "csf-ord-online",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "fix": "node fix-dependencies.js",
+    "db:init": "npx tsx scripts/init-firestore.ts",
+    "db:setup": "firebase init firestore",
+    "db:deploy": "firebase deploy --only firestore",
+    "db:rules": "firebase deploy --only firestore:rules",
+    "db:indexes": "firebase deploy --only firestore:indexes",
+    "setup:admins": "npx tsx scripts/setup-admin-users.ts",
+    "security:test": "npx tsx scripts/security-test.ts"
+  },
+  "dependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "chart.js": "^4.4.1",
+    "firebase": "^9.23.0",
+    "lucide-react": "^0.294.0",
+    "next": "14.0.4",
+    "react": "^18",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18",
+    "typescript": "^5"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "firebase-tools": "^13.0.0",
+    "tsx": "^4.6.0"
+  }
+}
