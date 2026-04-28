@@ -11,17 +11,26 @@ import {
   updateDoc,
   Timestamp 
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { getFirebaseDb } from './firebase';
 import { CSFResponse, CSFTemplate, EmailNotification } from '@/types';
 
 const CSF_RESPONSES_COLLECTION = 'csf_responses';
 const CSF_TEMPLATES_COLLECTION = 'csf_templates';
 const EMAIL_NOTIFICATIONS_COLLECTION = 'email_notifications';
 
+// Helper function to get database instance
+function getDb() {
+  const db = getFirebaseDb();
+  if (!db) {
+    throw new Error('Firebase is not initialized. Make sure you are running this on the client side.');
+  }
+  return db;
+}
+
 // CSF Templates
 export const createCSFTemplate = async (template: Omit<CSFTemplate, 'id'>) => {
   try {
-    const docRef = await addDoc(collection(db, CSF_TEMPLATES_COLLECTION), {
+    const docRef = await addDoc(collection(getDb(), CSF_TEMPLATES_COLLECTION), {
       ...template,
       createdAt: new Date().toISOString(),
     });
@@ -34,7 +43,7 @@ export const createCSFTemplate = async (template: Omit<CSFTemplate, 'id'>) => {
 
 export const getCSFTemplates = async () => {
   try {
-    const q = query(collection(db, CSF_TEMPLATES_COLLECTION), orderBy('createdAt', 'desc'));
+    const q = query(collection(getDb(), CSF_TEMPLATES_COLLECTION), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
@@ -48,7 +57,7 @@ export const getCSFTemplates = async () => {
 
 export const getCSFTemplate = async (id: string) => {
   try {
-    const docRef = doc(db, CSF_TEMPLATES_COLLECTION, id);
+    const docRef = doc(getDb(), CSF_TEMPLATES_COLLECTION, id);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
@@ -64,7 +73,7 @@ export const getCSFTemplate = async (id: string) => {
 
 export const updateCSFTemplate = async (id: string, updates: Partial<CSFTemplate>) => {
   try {
-    const docRef = doc(db, CSF_TEMPLATES_COLLECTION, id);
+    const docRef = doc(getDb(), CSF_TEMPLATES_COLLECTION, id);
     await updateDoc(docRef, updates);
   } catch (error) {
     console.error('Error updating CSF template:', error);
@@ -75,7 +84,7 @@ export const updateCSFTemplate = async (id: string, updates: Partial<CSFTemplate
 // CSF Responses
 export const addCSFResponse = async (response: Omit<CSFResponse, 'id'>) => {
   try {
-    const docRef = await addDoc(collection(db, CSF_RESPONSES_COLLECTION), {
+    const docRef = await addDoc(collection(getDb(), CSF_RESPONSES_COLLECTION), {
       ...response,
       createdAt: Timestamp.now(),
     });
@@ -92,10 +101,10 @@ export const addCSFResponse = async (response: Omit<CSFResponse, 'id'>) => {
 
 export const getCSFResponses = async (csfId?: string, limitCount?: number) => {
   try {
-    let q = query(collection(db, CSF_RESPONSES_COLLECTION), orderBy('createdAt', 'desc'));
+    let q = query(collection(getDb(), CSF_RESPONSES_COLLECTION), orderBy('createdAt', 'desc'));
     
     if (csfId) {
-      q = query(collection(db, CSF_RESPONSES_COLLECTION), where('csfId', '==', csfId), orderBy('createdAt', 'desc'));
+      q = query(collection(getDb(), CSF_RESPONSES_COLLECTION), where('csfId', '==', csfId), orderBy('createdAt', 'desc'));
     }
     
     if (limitCount) {
@@ -116,7 +125,7 @@ export const getCSFResponses = async (csfId?: string, limitCount?: number) => {
 export const getCSFResponsesByTemplate = async (csfId: string) => {
   try {
     const q = query(
-      collection(db, CSF_RESPONSES_COLLECTION),
+      collection(getDb(), CSF_RESPONSES_COLLECTION),
       where('csfId', '==', csfId),
       orderBy('createdAt', 'desc')
     );
@@ -135,7 +144,7 @@ export const getCSFResponsesByTemplate = async (csfId: string) => {
 // Email Notifications
 export const createEmailNotification = async (notification: Omit<EmailNotification, 'id'>) => {
   try {
-    const docRef = await addDoc(collection(db, EMAIL_NOTIFICATIONS_COLLECTION), {
+    const docRef = await addDoc(collection(getDb(), EMAIL_NOTIFICATIONS_COLLECTION), {
       ...notification,
       createdAt: Timestamp.now(),
     });
@@ -148,10 +157,10 @@ export const createEmailNotification = async (notification: Omit<EmailNotificati
 
 export const getEmailNotifications = async (csfId?: string) => {
   try {
-    let q = query(collection(db, EMAIL_NOTIFICATIONS_COLLECTION), orderBy('createdAt', 'desc'));
+    let q = query(collection(getDb(), EMAIL_NOTIFICATIONS_COLLECTION), orderBy('createdAt', 'desc'));
     
     if (csfId) {
-      q = query(collection(db, EMAIL_NOTIFICATIONS_COLLECTION), where('csfId', '==', csfId), orderBy('createdAt', 'desc'));
+      q = query(collection(getDb(), EMAIL_NOTIFICATIONS_COLLECTION), where('csfId', '==', csfId), orderBy('createdAt', 'desc'));
     }
     
     const querySnapshot = await getDocs(q);
@@ -168,7 +177,7 @@ export const getEmailNotifications = async (csfId?: string) => {
 export const updateNotificationStatus = async (csfId: string, email: string, responseId?: string) => {
   try {
     const q = query(
-      collection(db, EMAIL_NOTIFICATIONS_COLLECTION),
+      collection(getDb(), EMAIL_NOTIFICATIONS_COLLECTION),
       where('csfId', '==', csfId),
       where('recipientEmail', '==', email)
     );

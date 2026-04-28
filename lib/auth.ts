@@ -11,7 +11,7 @@ import {
   updateDoc, 
   Timestamp 
 } from 'firebase/firestore';
-import { db, auth } from './firebase';
+import { getFirebaseDb, getFirebaseAuth } from './firebase';
 
 export interface AdminUser {
   uid: string;
@@ -105,6 +105,12 @@ export class AuthService {
         throw new Error('Too many failed attempts. Please try again later.');
       }
       
+      // Get auth instance
+      const auth = getFirebaseAuth();
+      if (!auth) {
+        throw new Error('Firebase authentication is not available');
+      }
+      
       // Attempt Firebase authentication
       const userCredential = await signInWithEmailAndPassword(auth, sanitizedEmail, password);
       const firebaseUser = userCredential.user;
@@ -163,7 +169,10 @@ export class AuthService {
   // Sign out
   static async signOut(): Promise<void> {
     try {
-      await signOut(auth);
+      const auth = getFirebaseAuth();
+      if (auth) {
+        await signOut(auth);
+      }
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;
@@ -173,6 +182,12 @@ export class AuthService {
   // Get admin user data
   static async getAdminUser(uid: string): Promise<AdminUser | null> {
     try {
+      const db = getFirebaseDb();
+      if (!db) {
+        console.error('Firebase database is not available');
+        return null;
+      }
+      
       const userDoc = await getDoc(doc(db, 'admin_users', uid));
       if (userDoc.exists()) {
         return { uid, ...userDoc.data() } as AdminUser;
@@ -187,6 +202,12 @@ export class AuthService {
   // Update last login timestamp
   static async updateLastLogin(uid: string): Promise<void> {
     try {
+      const db = getFirebaseDb();
+      if (!db) {
+        console.error('Firebase database is not available');
+        return;
+      }
+      
       const userRef = doc(db, 'admin_users', uid);
       await updateDoc(userRef, {
         lastLogin: new Date().toISOString()
@@ -198,12 +219,17 @@ export class AuthService {
   
   // Monitor auth state changes
   static onAuthStateChanged(callback: (user: User | null) => void) {
-    return onAuthStateChanged(auth, callback);
+    const auth = getFirebaseAuth();
+    if (auth) {
+      return onAuthStateChanged(auth, callback);
+    }
+    return () => {}; // Return empty unsubscribe function if auth not available
   }
   
   // Get current user
   static getCurrentUser(): User | null {
-    return auth.currentUser;
+    const auth = getFirebaseAuth();
+    return auth ? auth.currentUser : null;
   }
   
   // Check if user has admin role

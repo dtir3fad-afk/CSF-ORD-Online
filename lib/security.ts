@@ -11,7 +11,7 @@
  */
 
 import { doc, setDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
-import { db } from './firebase';
+import { getFirebaseDb } from './firebase';
 
 export interface SecurityEvent {
   type: 'login_attempt' | 'suspicious_activity' | 'data_access' | 'admin_action';
@@ -210,8 +210,11 @@ export class SecurityService {
       }
       
       // Store in Firestore
-      const eventId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      await setDoc(doc(db, 'security_events', eventId), securityEvent);
+      const db = getFirebaseDb();
+      if (db) {
+        const eventId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        await setDoc(doc(db, 'security_events', eventId), securityEvent);
+      }
       
       // Log to console for development
       if (process.env.NODE_ENV === 'development') {
@@ -267,6 +270,12 @@ export class SecurityService {
     limit_count: number = 100
   ): Promise<SecurityEvent[]> {
     try {
+      const db = getFirebaseDb();
+      if (!db) {
+        console.warn('Firebase database not available');
+        return [];
+      }
+      
       let q = query(
         collection(db, 'security_events'),
         orderBy('timestamp', 'desc'),

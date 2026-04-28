@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getAuth, Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,15 +11,56 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase only if it hasn't been initialized already
-const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Initialize Firebase only on client side and if config is valid
+let app: FirebaseApp | null = null;
+let db: Firestore | null = null;
+let auth: Auth | null = null;
 
-// Initialize services
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-export { app };
+function initializeFirebase() {
+  // Only initialize on client side and if not already initialized
+  if (typeof window !== 'undefined' && !app) {
+    // Check if we have valid config
+    if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+      console.warn('Firebase configuration is incomplete. Some features may not work.');
+      return null;
+    }
 
-// Firebase is configured and ready to use
-// Emulator connections are disabled for production compatibility
+    try {
+      app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+      db = getFirestore(app);
+      auth = getAuth(app);
+      return app;
+    } catch (error) {
+      console.error('Failed to initialize Firebase:', error);
+      return null;
+    }
+  }
+  return app;
+}
 
-export default app;
+// Getter functions that ensure Firebase is initialized
+export function getFirebaseApp(): FirebaseApp | null {
+  if (!app) {
+    initializeFirebase();
+  }
+  return app;
+}
+
+export function getFirebaseDb(): Firestore | null {
+  if (!db) {
+    initializeFirebase();
+  }
+  return db;
+}
+
+export function getFirebaseAuth(): Auth | null {
+  if (!auth) {
+    initializeFirebase();
+  }
+  return auth;
+}
+
+// For backward compatibility, export the getter functions as the original names
+export { getFirebaseDb as db, getFirebaseAuth as auth, getFirebaseApp as app };
+
+export default getFirebaseApp;

@@ -4,10 +4,16 @@
  */
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import app from './firebase';
+import { getFirebaseApp } from './firebase';
 
 // Initialize storage with the app
-const storage = getStorage(app);
+function getStorageInstance() {
+  const app = getFirebaseApp();
+  if (!app) {
+    throw new Error('Firebase app is not initialized');
+  }
+  return getStorage(app);
+}
 
 export interface UploadResult {
   previewUrl: string;
@@ -23,6 +29,7 @@ export interface UploadResult {
  */
 export const uploadDocument = async (file: File): Promise<UploadResult> => {
   try {
+    const storage = getStorageInstance();
     const timestamp = Date.now();
     const fileName = `${timestamp}_${file.name}`;
     
