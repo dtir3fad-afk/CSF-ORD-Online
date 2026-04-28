@@ -80,6 +80,7 @@ export default function AdminCSFManager() {
             template={template}
             onView={() => setSelectedTemplate(template)}
             onRefresh={loadTemplates}
+            onShowEmailPreview={setShowEmailPreview}
           />
         ))}
         
@@ -410,11 +411,13 @@ function CreateCSFForm({
 function CSFTemplateCard({ 
   template, 
   onView, 
-  onRefresh 
+  onRefresh,
+  onShowEmailPreview
 }: { 
   template: CSFTemplate;
   onView: () => void;
   onRefresh: () => void;
+  onShowEmailPreview: (data: { template: CSFTemplate; email: string }) => void;
 }) {
   const [responses, setResponses] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -614,7 +617,7 @@ Department of Trade and Industry`;
         </button>
         
         <button
-          onClick={() => setShowEmailPreview({ template, email: template.recipients?.[0] || 'client@example.com' })}
+          onClick={() => onShowEmailPreview({ template, email: template.recipients?.[0] || 'client@example.com' })}
           className="btn-sm"
           style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
         >

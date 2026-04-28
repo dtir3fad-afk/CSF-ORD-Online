@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from 'firebase/app';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 
@@ -12,33 +12,14 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase only if it hasn't been initialized already
-let app;
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
-}
+const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 // Initialize services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export { app };
 
-// Only connect to emulators in development and if not already connected
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  // Check if emulators are already connected to avoid reconnection errors
-  try {
-    // These will only connect if not already connected
-    if (!auth._delegate._config?.emulator) {
-      // connectAuthEmulator(auth, 'http://localhost:9099');
-    }
-    if (!db._delegate._databaseId?.projectId?.includes('demo-')) {
-      // connectFirestoreEmulator(db, 'localhost', 8080);
-    }
-  } catch (error) {
-    // Emulators already connected or not available
-    console.log('Firebase emulators not connected:', error.message);
-  }
-}
+// Firebase is configured and ready to use
+// Emulator connections are disabled for production compatibility
 
 export default app;
