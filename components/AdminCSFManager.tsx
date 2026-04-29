@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Upload, Eye, Users, FileText, Trash2, Mail, CheckCircle, AlertCircle, Copy, ExternalLink } from 'lucide-react';
-import { createCSFTemplate, getCSFTemplates, getCSFResponsesByTemplate } from '@/lib/firestore';
+import { createCSFTemplate, getCSFTemplates, getCSFResponsesByTemplate, deleteCSFTemplate } from '@/lib/firestore';
 import { uploadDocument, validateDocument } from '@/lib/storage';
 import { generateCSFInvitationEmail } from '@/lib/email';
 import { CSFTemplate } from '@/types';
@@ -44,6 +44,23 @@ export default function AdminCSFManager() {
     }
   };
 
+  const handleDeleteTemplate = async (templateId: string, templateTitle: string) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${templateTitle}"?\n\nThis action cannot be undone and will permanently remove the CSF template and all associated data.`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      await deleteCSFTemplate(templateId);
+      await loadTemplates();
+      setError(null);
+    } catch (err) {
+      setError('Failed to delete CSF template');
+      console.error(err);
+    }
+  };
+
   if (loading) {
     return <div className="loading">Loading CSF templates...</div>;
   }
@@ -81,6 +98,7 @@ export default function AdminCSFManager() {
             onView={() => setSelectedTemplate(template)}
             onRefresh={loadTemplates}
             onShowEmailPreview={setShowEmailPreview}
+            onDelete={(templateId, templateTitle) => handleDeleteTemplate(templateId, templateTitle)}
           />
         ))}
         
@@ -335,12 +353,14 @@ function CSFTemplateCard({
   template, 
   onView, 
   onRefresh,
-  onShowEmailPreview
+  onShowEmailPreview,
+  onDelete
 }: { 
   template: CSFTemplate;
   onView: () => void;
   onRefresh: () => void;
   onShowEmailPreview: (data: { template: CSFTemplate; email: string }) => void;
+  onDelete: (templateId: string, templateTitle: string) => void;
 }) {
   const [responses, setResponses] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -481,6 +501,22 @@ Department of Trade and Industry`;
         >
           <Eye size={12} />
           View Details
+        </button>
+        
+        <button
+          onClick={() => onDelete(template.id!, template.title)}
+          className="btn-sm"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '4px',
+            color: '#d93025',
+            borderColor: '#f9ab9d'
+          }}
+          title="Delete CSF Template"
+        >
+          <Trash2 size={12} />
+          Delete
         </button>
         
         <button

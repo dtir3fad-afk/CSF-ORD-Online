@@ -82,6 +82,16 @@ export const updateCSFTemplate = async (id: string, updates: Partial<CSFTemplate
   }
 };
 
+export const deleteCSFTemplate = async (id: string) => {
+  try {
+    const docRef = doc(getDb(), CSF_TEMPLATES_COLLECTION, id);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.error('Error deleting CSF template:', error);
+    throw error;
+  }
+};
+
 // CSF Responses
 export const addCSFResponse = async (response: Omit<CSFResponse, 'id'>) => {
   try {
