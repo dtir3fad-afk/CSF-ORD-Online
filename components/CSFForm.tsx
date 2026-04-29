@@ -112,6 +112,8 @@ export default function CSFForm() {
       const response: Omit<CSFResponse, 'id'> = {
         ...formData,
         name: fullName, // Combine names for compatibility
+        reason: formData.comments, // Map comments to reason for compatibility
+        suggest: formData.suggestions, // Map suggestions to suggest for compatibility
         csfId: 'demo-csf-id', // In real app, this would come from URL params
         ctype: formData.ctype as CSFResponse['ctype'],
         sex: formData.sex as CSFResponse['sex'],

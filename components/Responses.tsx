@@ -500,7 +500,7 @@ function ResponseViewModal({
           </div>
 
           {/* Comments */}
-          {response.comments && (
+          {response.reason && (
             <div style={{ marginBottom: '24px' }}>
               <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>Comments</h3>
               <div style={{ 
@@ -510,13 +510,13 @@ function ResponseViewModal({
                 fontSize: '12px',
                 lineHeight: '1.5'
               }}>
-                {response.comments}
+                {response.reason}
               </div>
             </div>
           )}
 
           {/* Suggestions */}
-          {response.suggestions && (
+          {response.suggest && (
             <div>
               <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>Suggestions</h3>
               <div style={{ 
@@ -526,7 +526,7 @@ function ResponseViewModal({
                 fontSize: '12px',
                 lineHeight: '1.5'
               }}>
-                {response.suggestions}
+                {response.suggest}
               </div>
             </div>
           )}
