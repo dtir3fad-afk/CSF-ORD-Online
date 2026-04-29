@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Upload, Send, Eye, Users, FileText, Trash2, Mail, CheckCircle, AlertCircle, Copy, ExternalLink } from 'lucide-react';
-import { createCSFTemplate, getCSFTemplates, getCSFResponsesByTemplate, createEmailNotification } from '@/lib/firestore';
+import { Plus, Upload, Eye, Users, FileText, Trash2, Mail, CheckCircle, AlertCircle, Copy, ExternalLink } from 'lucide-react';
+import { createCSFTemplate, getCSFTemplates, getCSFResponsesByTemplate } from '@/lib/firestore';
 import { uploadDocument, validateDocument } from '@/lib/storage';
-import { sendCSFInvitations, generateCSFInvitationEmail } from '@/lib/email';
+import { generateCSFInvitationEmail } from '@/lib/email';
 import { CSFTemplate } from '@/types';
 
 export default function AdminCSFManager() {
@@ -132,8 +132,7 @@ function CreateCSFForm({
     previewFileUrl: '',
     fullFileUrl: '',
     fileName: '',
-    createdBy: 'Admin', // In real app, get from auth
-    recipients: ['']
+    createdBy: 'Admin' // In real app, get from auth
   });
   
   const [uploading, setUploading] = useState(false);
@@ -194,39 +193,16 @@ function CreateCSFForm({
       return;
     }
     
-    const recipients = formData.recipients.filter(email => email.trim() !== '');
-    
     onSubmit({
       title: formData.title,
       description: formData.description,
       previewFileUrl: formData.previewFileUrl,
       fullFileUrl: formData.fullFileUrl,
       createdBy: formData.createdBy,
-      recipients,
+      recipients: [], // Empty array since recipients are handled manually
       isActive: true,
       createdAt: new Date().toISOString()
     });
-  };
-
-  const addRecipient = () => {
-    setFormData(prev => ({
-      ...prev,
-      recipients: [...prev.recipients, '']
-    }));
-  };
-
-  const updateRecipient = (index: number, email: string) => {
-    setFormData(prev => ({
-      ...prev,
-      recipients: prev.recipients.map((r, i) => i === index ? email : r)
-    }));
-  };
-
-  const removeRecipient = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      recipients: prev.recipients.filter((_, i) => i !== index)
-    }));
   };
 
   return (
@@ -333,59 +309,6 @@ function CreateCSFForm({
             </div>
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, marginBottom: '6px' }}>
-              Recipients *
-            </label>
-            {formData.recipients.map((email, index) => (
-              <div key={index} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => updateRecipient(index, e.target.value)}
-                  placeholder="client@example.com"
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid var(--color-border-secondary)',
-                    borderRadius: 'var(--border-radius-md)',
-                    fontSize: '12px'
-                  }}
-                />
-                {formData.recipients.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeRecipient(index)}
-                    style={{
-                      padding: '8px',
-                      border: '1px solid var(--color-border-secondary)',
-                      borderRadius: 'var(--border-radius-md)',
-                      background: 'transparent',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addRecipient}
-              style={{
-                padding: '6px 12px',
-                border: '1px dashed var(--color-border-secondary)',
-                borderRadius: 'var(--border-radius-md)',
-                background: 'transparent',
-                cursor: 'pointer',
-                fontSize: '12px',
-                color: 'var(--color-text-secondary)'
-              }}
-            >
-              + Add another recipient
-            </button>
-          </div>
-
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
             <button
               type="button"
@@ -436,46 +359,6 @@ function CSFTemplateCard({
       console.error('Error loading response count:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSendEmails = async () => {
-    try {
-      if (!template.id) return;
-      
-      const recipients = template.recipients || [];
-      if (recipients.length === 0) {
-        alert('No recipients found for this template.');
-        return;
-      }
-
-      const confirmed = confirm(`Send CSF invitations to ${recipients.length} recipients?`);
-      if (!confirmed) return;
-
-      // Send emails
-      const result = await sendCSFInvitations(
-        recipients,
-        template.title,
-        template.id,
-        template.createdBy
-      );
-
-      // Create notification records
-      for (const recipient of recipients) {
-        await createEmailNotification({
-          csfId: template.id,
-          recipientEmail: recipient,
-          status: 'sent',
-          sentAt: new Date().toISOString(),
-          responseReceived: false
-        });
-      }
-
-      alert(`Successfully sent ${result.sent} invitations. ${result.failed} failed.`);
-      onRefresh();
-    } catch (error) {
-      console.error('Error sending emails:', error);
-      alert('Failed to send invitations. Please try again.');
     }
   };
 
@@ -574,26 +457,19 @@ Department of Trade and Industry`;
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
         <div style={{ textAlign: 'center', padding: '8px', background: 'var(--color-background-secondary)', borderRadius: 'var(--border-radius-md)' }}>
           <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-            {template.recipients?.length || 0}
+            Manual
           </div>
-          <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>Recipients</div>
+          <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>Distribution</div>
         </div>
         
         <div style={{ textAlign: 'center', padding: '8px', background: 'var(--color-background-secondary)', borderRadius: 'var(--border-radius-md)' }}>
           <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
             {loading ? '...' : responses}
           </div>
-          <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>Responses</div>
-        </div>
-        
-        <div style={{ textAlign: 'center', padding: '8px', background: 'var(--color-background-secondary)', borderRadius: 'var(--border-radius-md)' }}>
-          <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-            {loading ? '...' : Math.round((responses / (template.recipients?.length || 1)) * 100) || 0}%
-          </div>
-          <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>Response Rate</div>
+          <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>Total Responses</div>
         </div>
       </div>
 
@@ -608,16 +484,7 @@ Department of Trade and Industry`;
         </button>
         
         <button
-          onClick={handleSendEmails}
-          className="btn-sm"
-          style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
-        >
-          <Send size={12} />
-          Send Emails
-        </button>
-        
-        <button
-          onClick={() => onShowEmailPreview({ template, email: template.recipients?.[0] || 'client@example.com' })}
+          onClick={() => onShowEmailPreview({ template, email: 'client@example.com' })}
           className="btn-sm"
           style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
         >
@@ -705,18 +572,15 @@ function CSFTemplateModal({
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Recipients</h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {(template.recipients || []).map((email, index) => (
-              <span key={index} style={{
-                padding: '4px 8px',
-                background: 'var(--color-background-secondary)',
-                borderRadius: 'var(--border-radius-md)',
-                fontSize: '12px'
-              }}>
-                {email}
-              </span>
-            ))}
+          <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Distribution Method</h3>
+          <div style={{ 
+            padding: '8px 12px', 
+            background: 'var(--color-background-secondary)', 
+            borderRadius: 'var(--border-radius-md)',
+            fontSize: '12px',
+            color: 'var(--color-text-secondary)'
+          }}>
+            Manual distribution via copy link and email template
           </div>
         </div>
 
@@ -1027,7 +891,7 @@ function EmailPreviewModal({
                 {csfUrl}
               </div>
               <div style={{ marginTop: '8px', color: 'var(--color-text-secondary)' }}>
-                Recipients: {template.recipients?.join(', ') || 'No recipients set'}
+                Distribution: Manual (use copy link and email template buttons)
               </div>
             </div>
           </div>

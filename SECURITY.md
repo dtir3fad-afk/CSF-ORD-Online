@@ -317,4 +317,4 @@ AUDIT_LOGGING=true
 
 **Last Updated**: December 2024  
 **Version**: 1.0  
-**Reviewed By**: DTI Security Team
+**Reviewed By**: DTI Security Team (jerick)

@@ -9,6 +9,7 @@ import {
   limit,
   where,
   updateDoc,
+  deleteDoc,
   Timestamp 
 } from 'firebase/firestore';
 import { getFirebaseDb } from './firebase';
@@ -141,6 +142,17 @@ export const getCSFResponsesByTemplate = async (csfId: string) => {
   }
 };
 
+// Delete CSF Response
+export const deleteCSFResponse = async (responseId: string) => {
+  try {
+    const docRef = doc(getDb(), CSF_RESPONSES_COLLECTION, responseId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.error('Error deleting CSF response:', error);
+    throw error;
+  }
+};
+
 // Email Notifications
 export const createEmailNotification = async (notification: Omit<EmailNotification, 'id'>) => {
   try {
@@ -221,14 +233,14 @@ export const getDashboardMetrics = async () => {
       
       if (avgRatings.length > 0) {
         const globalAvg = avgRatings.reduce((a, b) => a + b, 0) / avgRatings.length;
-        avgRating = Math.max(0, 6 - globalAvg); // Convert to 1-5 scale, ensure non-negative
+        avgRating = globalAvg; // Use direct average since 5=Strongly Agree, 1=Strongly Disagree
         
         const satisfiedCount = completedResponses.filter(r => {
           if (!r.ratings || typeof r.ratings !== 'object') return false;
           const vals = Object.values(r.ratings).filter(v => typeof v === 'number' && v > 0);
           if (vals.length === 0) return false;
           const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-          return avg <= 2; // 1-2 are satisfied
+          return avg >= 4; // 4-5 are satisfied (Agree + Strongly Agree)
         }).length;
         
         satisfactionRate = Math.round((satisfiedCount / completedResponses.length) * 100);

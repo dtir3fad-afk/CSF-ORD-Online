@@ -88,7 +88,7 @@ export default function Dashboard() {
         ...r,
         overallRating,
         avgRating,
-        scoreClass: avgRating <= 2 ? 'score-hi' : avgRating <= 3.5 ? 'score-mid' : 'score-lo'
+        scoreClass: avgRating >= 4 ? 'score-hi' : avgRating >= 3 ? 'score-mid' : 'score-lo'
       };
     });
   };
