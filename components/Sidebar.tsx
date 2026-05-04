@@ -21,6 +21,26 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const handleSignOut = async () => {
     if (confirm('Are you sure you want to sign out?')) {
       await signOut();
+      // Force reload to clear any cached state
+      window.location.reload();
+    }
+  };
+
+  const handleClearSession = async () => {
+    if (confirm('Clear all authentication data? This will sign you out and clear browser storage.')) {
+      try {
+        // Clear Firebase auth
+        await signOut();
+        
+        // Clear browser storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Force reload
+        window.location.reload();
+      } catch (error) {
+        console.error('Error clearing session:', error);
+      }
     }
   };
 
@@ -108,7 +128,8 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '4px',
-            transition: 'all 0.1s'
+            transition: 'all 0.1s',
+            marginBottom: '4px'
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.background = 'var(--color-background-secondary)';
@@ -122,6 +143,38 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           <LogOut size={10} />
           Sign Out
         </button>
+        
+        {process.env.NODE_ENV === 'development' && (
+          <button
+            onClick={handleClearSession}
+            style={{
+              width: '100%',
+              padding: '4px 6px',
+              background: 'transparent',
+              border: '1px solid #dc2626',
+              borderRadius: '3px',
+              fontSize: '9px',
+              color: '#dc2626',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '3px',
+              transition: 'all 0.1s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = '#dc2626';
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#dc2626';
+            }}
+            title="Development only: Clear all auth data"
+          >
+            Clear Session
+          </button>
+        )}
       </div>
       
       <div className="sb-footer">

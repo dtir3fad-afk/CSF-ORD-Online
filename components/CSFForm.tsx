@@ -424,9 +424,9 @@ export default function CSFForm() {
               <FormField label="Client type: *">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {[
-                    { value: 'Citizen', label: '☐ Citizen' },
-                    { value: 'Business', label: '☐ Business' },
-                    { value: 'Government', label: '☐ Government (Employee or another agency)' }
+                    { value: 'Citizen', label: 'Citizen' },
+                    { value: 'Business', label: 'Business' },
+                    { value: 'Government', label: 'Government (Employee or another agency)' }
                   ].map((option) => (
                     <label key={option.value} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '11px' }}>
                       <input
@@ -445,8 +445,8 @@ export default function CSFForm() {
                 <FormField label="Sex: *">
                   <div style={{ display: 'flex', gap: '12px' }}>
                     {[
-                      { value: 'Male', label: '☐ Male' },
-                      { value: 'Female', label: '☐ Female' }
+                      { value: 'Male', label: 'Male' },
+                      { value: 'Female', label: 'Female' }
                     ].map((option) => (
                       <label key={option.value} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '11px' }}>
                         <input
@@ -464,11 +464,11 @@ export default function CSFForm() {
                 <FormField label="Age: *">
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {[
-                      { value: '19 or lower', label: '☐ 19 or lower' },
-                      { value: '20-34', label: '☐ 20-34' },
-                      { value: '35-49', label: '☐ 35-49' },
-                      { value: '50-64', label: '☐ 50-64' },
-                      { value: '65 or higher', label: '☐ 65 or higher' }
+                      { value: '19 or lower', label: '19 or lower' },
+                      { value: '20-34', label: '20-34' },
+                      { value: '35-49', label: '35-49' },
+                      { value: '50-64', label: '50-64' },
+                      { value: '65 or higher', label: '65 or higher' }
                     ].map((option) => (
                       <label key={option.value} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '10px' }}>
                         <input

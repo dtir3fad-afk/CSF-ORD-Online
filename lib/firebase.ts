@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -30,6 +30,19 @@ function initializeFirebase() {
       app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
       db = getFirestore(app);
       auth = getAuth(app);
+      
+      // Set persistence based on environment or user preference
+      // For development, you might want session-only persistence
+      if (auth) {
+        const persistenceType = process.env.NODE_ENV === 'development' 
+          ? browserSessionPersistence  // Session only in development
+          : browserLocalPersistence;   // Persistent in production
+        
+        setPersistence(auth, persistenceType).catch((error) => {
+          console.warn('Failed to set auth persistence:', error);
+        });
+      }
+      
       console.log('✅ Firebase initialized successfully');
       return app;
     } catch (error) {
