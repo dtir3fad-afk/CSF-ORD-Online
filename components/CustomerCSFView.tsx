@@ -283,7 +283,7 @@ export default function CustomerCSFView() {
               DTI
             </div>
             <div>
-              <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                 {template.title}
               </h1>
               <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
@@ -329,7 +329,7 @@ export default function CustomerCSFView() {
                 PDF
               </div>
               <div>
-                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                   DTI Client Satisfaction Feedback Form
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>
@@ -372,7 +372,7 @@ export default function CustomerCSFView() {
               alignItems: 'center', 
               justifyContent: 'space-between' 
             }}>
-              <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                 Client Satisfaction Form
               </span>
               <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
