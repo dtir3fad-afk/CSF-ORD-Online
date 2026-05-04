@@ -196,12 +196,17 @@ const LockOverlay = ({ isLocked }: { isLocked: boolean }) => (
           alignItems: 'center',
           gap: '8px',
           padding: '8px 16px',
-          background: '#E6EEF7',
+          background: '#FFE6E6',
           borderRadius: '20px',
-          border: '1px solid #1A4B8C'
+          border: '2px solid #DC2626'
         }}>
-          <Lock size={16} color="#1A4B8C" />
-          <span style={{ fontSize: '12px', fontWeight: 500, color: '#1A4B8C' }}>
+          <Lock size={16} color="#DC2626" />
+          <span style={{ 
+            fontSize: '12px', 
+            fontWeight: 700, 
+            color: '#DC2626',
+            textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+          }}>
             Complete the form to unlock full document
           </span>
         </div>
