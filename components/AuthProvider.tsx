@@ -42,6 +42,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         console.log('🔄 Initializing authentication...');
         
+        // Development mode: Check for force logout flag
+        if (process.env.NODE_ENV === 'development') {
+          const forceLogout = localStorage.getItem('force_logout');
+          if (forceLogout === 'true') {
+            console.log('🧹 Force logout flag detected, clearing auth state');
+            localStorage.removeItem('force_logout');
+            const auth = AuthService.getCurrentUser();
+            if (auth) {
+              await AuthService.signOut();
+            }
+            setLoading(false);
+            return;
+          }
+        }
+        
         // Set a timeout to prevent infinite loading
         timeoutId = setTimeout(() => {
           console.log('⏰ Auth initialization timeout, setting loading to false');

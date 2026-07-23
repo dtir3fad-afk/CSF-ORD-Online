@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import { getAuth, Auth, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
+import { getAuth, Auth, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -73,6 +73,37 @@ export function getFirebaseAuth(): Auth | null {
     initializeFirebase();
   }
   return auth;
+}
+
+// Force clear all authentication data
+export function forceSignOut(): void {
+  if (typeof window !== 'undefined') {
+    try {
+      // Clear Firebase auth
+      const auth = getFirebaseAuth();
+      if (auth && auth.currentUser) {
+        signOut(auth);
+      }
+      
+      // Clear all browser storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Clear specific Firebase keys that might persist
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('firebase:') || key.includes('firebase'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      console.log('🧹 Forced sign out and cleared all auth data');
+    } catch (error) {
+      console.error('Error during force sign out:', error);
+    }
+  }
 }
 
 // For backward compatibility, export the getter functions as the original names

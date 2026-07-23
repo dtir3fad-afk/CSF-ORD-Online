@@ -2,6 +2,7 @@
 
 import { Home, FileText, MessageSquare, BarChart3, LogOut, User } from 'lucide-react';
 import { useAuth } from './AuthProvider';
+import { forceSignOut } from '@/lib/firebase';
 
 interface SidebarProps {
   activeTab: string;
@@ -29,15 +30,13 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const handleClearSession = async () => {
     if (confirm('Clear all authentication data? This will sign you out and clear browser storage.')) {
       try {
-        // Clear Firebase auth
-        await signOut();
+        // Use the aggressive force sign out
+        forceSignOut();
         
-        // Clear browser storage
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Force reload
-        window.location.reload();
+        // Force reload after a short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       } catch (error) {
         console.error('Error clearing session:', error);
       }
@@ -145,35 +144,70 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         </button>
         
         {process.env.NODE_ENV === 'development' && (
-          <button
-            onClick={handleClearSession}
-            style={{
-              width: '100%',
-              padding: '4px 6px',
-              background: 'transparent',
-              border: '1px solid #dc2626',
-              borderRadius: '3px',
-              fontSize: '9px',
-              color: '#dc2626',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '3px',
-              transition: 'all 0.1s'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = '#dc2626';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#dc2626';
-            }}
-            title="Development only: Clear all auth data"
-          >
-            Clear Session
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <button
+              onClick={handleClearSession}
+              style={{
+                width: '100%',
+                padding: '4px 6px',
+                background: 'transparent',
+                border: '1px solid #dc2626',
+                borderRadius: '3px',
+                fontSize: '9px',
+                color: '#dc2626',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '3px',
+                transition: 'all 0.1s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = '#dc2626';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#dc2626';
+              }}
+              title="Development only: Clear all auth data"
+            >
+              Clear Session
+            </button>
+            
+            <button
+              onClick={() => {
+                localStorage.setItem('force_logout', 'true');
+                window.location.reload();
+              }}
+              style={{
+                width: '100%',
+                padding: '4px 6px',
+                background: 'transparent',
+                border: '1px solid #f59e0b',
+                borderRadius: '3px',
+                fontSize: '9px',
+                color: '#f59e0b',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '3px',
+                transition: 'all 0.1s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = '#f59e0b';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#f59e0b';
+              }}
+              title="Development only: Force fresh login"
+            >
+              Force Logout
+            </button>
+          </div>
         )}
       </div>
       
